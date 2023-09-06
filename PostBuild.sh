@@ -74,6 +74,14 @@ function UsageMsg {
 
 # Clean yum/DNF history
 function CleanHistory {
+   err_exit "Remove spel-release package..." NONE
+   chroot "${CHROOTMNT}" yum erase -y spel-release || \
+     err_exit "Failed removing spel-release package"
+
+   err_exit "Remove epel-release package..." NONE
+   chroot "${CHROOTMNT}" yum erase -y epel-release || \
+     err_exit "Failed removing epel-release package"
+
    err_exit "Executing yum clean..." NONE
    chroot "${CHROOTMNT}" yum clean --enablerepo=* -y packages || \
      err_exit "Failed executing yum clean"

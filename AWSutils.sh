@@ -10,7 +10,6 @@ CLIV1SOURCE="${CLIV1SOURCE:-UNDEF}"
 CLIV2SOURCE="${CLIV2SOURCE:-UNDEF}"
 ICONNECTSRC="${ICONNECTSRC:-UNDEF}"
 DEBUG="${DEBUG:-UNDEF}"
-SSMAGENT="${SSMAGENT:-UNDEF}"
 UTILSDIR="${UTILSDIR:-UNDEF}"
 
 # Make interactive-execution more-verbose unless explicitly told not to
@@ -298,24 +297,6 @@ function InstallInstanceConnect {
 
 }
 
-# Install AWS utils from "directory"
-function InstallSSMagent {
-
-   if [[ ${SSMAGENT} == "UNDEF" ]]
-   then
-      err_exit "AWS SSM-Agent not requested for install. Skipping..." NONE
-   elif [[ ${SSMAGENT} == *.rpm ]]
-   then
-      err_exit "Installing AWS SSM-Agent RPM..." NONE
-      yum --installroot="${CHROOTMNT}" install -y "${SSMAGENT}" || \
-        err_exit "Failed installing AWS SSM-Agent RPM"
-
-      err_exit "Ensuring AWS SSM-Agent is enabled..." NONE
-      chroot "${CHROOTMNT}" systemctl enable amazon-ssm-agent.service || \
-        err_exit "Failed ensuring AWS SSM-Agent is enabled"
-   fi
-}
-
 # Force systemd services to be enabled in resultant AMI
 function EnableServices()
 {
@@ -494,19 +475,6 @@ do
                   ;;
             esac
             ;;
-      -s|--ssm-agent)
-            case "$2" in
-               "")
-                  err_exit "Error: option required but not specified"
-                  shift 2;
-                  exit 1
-                  ;;
-               *)
-                  SSMAGENT="${2}"
-                  shift 2;
-                  ;;
-            esac
-            ;;
       -t|--systemd-services)
             case "$2" in
                "")
@@ -539,9 +507,6 @@ InstallCLIv1
 
 # Install AWS CLIv2
 InstallCLIv2
-
-# Install AWS SSM-Agent
-InstallSSMagent
 
 # Install AWS InstanceConnect
 InstallInstanceConnect
